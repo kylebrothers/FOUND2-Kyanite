@@ -1,0 +1,59 @@
+﻿@page "/computer-vision-ocr"
+@inherits OCRModel
+
+<h2>FOUND Online Parent-Child Reunification</h2>
+<h3>1. Upload Child's Pictures</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="image-container">
+            <img class="preview-image" src=@imagePreview>
+        </div>
+        <InputFile OnChange="@ViewImage" />
+        <p>@status</p>
+    </div>
+</div>
+<hr / hidden="@DisplayStep2">
+<div class="row pt-3" hidden="@DisplayStep2">
+    <div class="col-md-6">
+        <h3>2. Enter Child's age</h3>
+        <div class="form-group">
+            <label for="ChildAge">Child's Age</label>
+            <input type="number" class="form-control" id="ChildGender" placeholder="Child's Age" value="@age">
+        </div>
+    </div>
+</div>
+<hr / hidden="@DisplayStep2">
+<div class="row pt-3" hidden="@DisplayStep2">
+    <div class="col-md-6">
+        <h3>3. Enter Child's Gender</h3>
+        <div class="form-group">
+            <label for="ChildGender">Child's Gender</label>
+            <input type="text" class="form-control" id="ChildGender" placeholder="Child's Gender" value="@gender">
+        </div>
+    </div>
+    </div>
+<div class="row pt-3" hidden="@DisplayStep2">
+    <button disabled="@loading" hidden="@DisplayStep2" class="btn btn-primary btn-lg" @onclick="FindMatches">
+        @if (loading)
+        {
+            <span class="spinner-border spinner-border-sm mr-1"></span>
+        }
+        Find Matches
+    </button>
+</div>
+<hr / hidden="@DisplayStep2">
+<div class="row pt-3" hidden="@DisplayStep2">
+    @foreach (KinCard KinCard in KinCardCollection)
+    {
+        <div class="col-4" hidden="@DisplayStep2">
+                <div class="card" style="width: 18rem;">
+                    <img class="card-img-top" src="@KinCard.FileName" alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title">@KinCard.Name</h5>
+                        <p class="card-text">Match %</p>
+                    </div>
+                </div>
+        </div>
+    }
+</div>

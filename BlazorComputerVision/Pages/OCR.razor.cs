@@ -49,7 +49,6 @@ namespace BlazorComputerVision.Pages
 
         protected async Task ViewImage(IFileListEntry[] files)
         {
-            status = "Picture loaded, please press button below to begin analysis";
             DisplayStep3 = false;
             var file = files.FirstOrDefault();
             if (file == null)
@@ -77,15 +76,18 @@ namespace BlazorComputerVision.Pages
                 imagePreview = "https://2.bp.blogspot.com/-R4i03mAdarY/WMksQxeJPeI/AAAAAAAAA90/NqrPy8TfTIQNqVI89vJ_uCce45WvklHhwCLcB/s1600/infinity.gif";
                 DisplayStep3 = true;
 
-                await File.WriteAllBytesAsync($"{System.IO.Directory.GetCurrentDirectory()}{@"\Upload\"}{file.Name}", imageFileBytes);
+                await File.WriteAllBytesAsync(Path.Combine(System.IO.Directory.GetCurrentDirectory(),"Upload", file.Name), imageFileBytes);
+                status = "File Saved on Server";
 
-                EnsureImageRequirements($"{System.IO.Directory.GetCurrentDirectory()}{@"\Upload\"}{file.Name}");
+                EnsureImageRequirements(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", file.Name));
+                status = "Image Requirements Ensured";
 
                 faceList = await FindFaces(file.Name);
+                status = "Faces Found:";
 
-                CropToFace($"{System.IO.Directory.GetCurrentDirectory()}{@"\Upload\"}{file.Name}", faceList.ElementAt(0));
+                CropToFace(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", file.Name), faceList.ElementAt(0));
 
-                Image CroppedImage = Image.FromFile($"{System.IO.Directory.GetCurrentDirectory()}{@"\Upload\"}{file.Name}");
+                Image CroppedImage = Image.FromFile(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", file.Name));
                 byte[] bArr = imgToByteArray(CroppedImage);
 
                 string base64String = Convert.ToBase64String(bArr, 0, bArr.Length);
@@ -116,7 +118,7 @@ namespace BlazorComputerVision.Pages
             // Call the Face API.
             try
             {
-                using (Stream imageFileStream = File.OpenRead($"{System.IO.Directory.GetCurrentDirectory()}{@"\Upload\"}{imageFilePath}"))
+                using (Stream imageFileStream = File.OpenRead(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", imageFilePath)))
                 {
                     // The second argument specifies to return the faceId, while
                     // the third argument specifies not to return face landmarks.
@@ -325,12 +327,12 @@ namespace BlazorComputerVision.Pages
         {
             KinCardCollection = new List<KinCard>();
 
-            string[] PossibleMatches = Directory.GetFiles($"{System.IO.Directory.GetCurrentDirectory()}{@"\Parents\"}");
+            string[] PossibleMatches = Directory.GetFiles(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Parents"));
 
             foreach (string PossibleMatch in PossibleMatches)
             {
                 KinCard CurrentKinCard = new KinCard();
-                Image PossibleMatchImage = Image.FromFile($"{System.IO.Directory.GetCurrentDirectory()}{@"\Parents\"}{Path.GetFileName(PossibleMatch)}");
+                Image PossibleMatchImage = Image.FromFile(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Parents", Path.GetFileName(PossibleMatch)));
                 byte[] bArr = imgToByteArray(PossibleMatchImage);
 
                 string base64String = Convert.ToBase64String(bArr, 0, bArr.Length);
@@ -366,7 +368,7 @@ namespace BlazorComputerVision.Pages
             HttpClient _client = new HttpClient();
             string url = "http://192.160.0.128:5000/upload";
 
-            var fileStream1 = await File.ReadAllBytesAsync($"{System.IO.Directory.GetCurrentDirectory()}{@"\Upload\"}{UploadedFile}");
+            var fileStream1 = await File.ReadAllBytesAsync(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", UploadedFile));
             var bytes1 = new ByteArrayContent(fileStream1);
             bytes1.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
 

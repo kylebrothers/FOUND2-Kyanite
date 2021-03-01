@@ -47,13 +47,15 @@
     @foreach (KinCard KinCard in KinCardCollection)
     {
         <div class="col-4" hidden="@DisplayStep2">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="@KinCard.FileName" alt="Card image cap">
-                    <div class="card-body">
-                        <h5 class="card-title">@KinCard.Name</h5>
-                        <p class="card-text">Match %</p>
-                    </div>
+            <div class="card" style="width: 18rem;">
+                <img class="card-img-top" src="@KinCard.FileName" alt="Card image cap">
+                <div class="card-body">
+                    <h5 class="card-title">@KinCard.Name</h5>
+                    <p class="card-text">Probability of match: @KinCard.Probability%</p>
                 </div>
+            </div>
         </div>
+        base.StateHasChanged();
     }
+
 </div>

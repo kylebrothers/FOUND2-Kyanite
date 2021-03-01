@@ -8,6 +8,8 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Net;
 using System.Net.Http;
 using BlazorComputerVision.Models;
@@ -24,7 +26,7 @@ namespace BlazorComputerVision.Pages
         protected bool loading = false;
         byte[] imageFileBytes;
 
-            const string DefaultStatus = "Maximum size allowed for the image is 8 MB";
+        const string DefaultStatus = "Maximum size allowed for the image is 8 MB";
         const bool DefaultDisplayStep2 = true;
         const bool DefaultDisplayStep3 = true;
         protected string status = DefaultStatus;
@@ -76,7 +78,7 @@ namespace BlazorComputerVision.Pages
                 imagePreview = "https://2.bp.blogspot.com/-R4i03mAdarY/WMksQxeJPeI/AAAAAAAAA90/NqrPy8TfTIQNqVI89vJ_uCce45WvklHhwCLcB/s1600/infinity.gif";
                 DisplayStep3 = true;
 
-                await File.WriteAllBytesAsync(Path.Combine(System.IO.Directory.GetCurrentDirectory(),"Upload", file.Name), imageFileBytes);
+                await File.WriteAllBytesAsync(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", file.Name), imageFileBytes);
                 status = "File Saved on Server";
 
                 EnsureImageRequirements(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", file.Name));
@@ -312,7 +314,7 @@ namespace BlazorComputerVision.Pages
             return tmpImage;
         }
 
-                
+
 
         public byte[] imgToByteArray(Image img)
         {
@@ -340,9 +342,11 @@ namespace BlazorComputerVision.Pages
                 CurrentKinCard.FileName = string.Concat("data:image/png;base64,", base64String);
                 CurrentKinCard.Name = AddSpacesToSentence(Path.GetFileNameWithoutExtension(PossibleMatch));
 
-                CurrentKinCard.Probability = await GoPost(UploadFileName, PossibleMatch);
+                string JSONResponse = await GoPost(UploadFileName, PossibleMatch);
 
-                status = CurrentKinCard.Probability;
+                Rootobject MyRootObject = JsonSerializer.Deserialize<Rootobject>(JSONResponse);
+
+                CurrentKinCard.Probability = Convert.ToString(Math.Round(MyRootObject.predictions[0].probability, 4)*100);
 
                 KinCardCollection.Add(CurrentKinCard);
             }
@@ -365,25 +369,20 @@ namespace BlazorComputerVision.Pages
 
         public async Task<string> GoPost(string UploadedFile, string PossibleMatchFile)
         {
-            HttpClient _client = new HttpClient();
-            string url = "http://192.160.0.128:5000/upload";
+            HttpResponseMessage response;
 
-            var fileStream1 = await File.ReadAllBytesAsync(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", UploadedFile));
-            var bytes1 = new ByteArrayContent(fileStream1);
-            bytes1.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-
-            var fileStream2 = await File.ReadAllBytesAsync(PossibleMatchFile);
-            var bytes2 = new ByteArrayContent(fileStream2);
-            bytes2.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-
-            var multipartFormDataContent = new MultipartFormDataContent
+            using (var httpClient = new HttpClient())
             {
-                // send file Here
-                {bytes1, "file1"},
-                {bytes2, "file2"}
-            };
+                using (var request = new HttpRequestMessage(new HttpMethod("POST"), "http://localhost:5001/home"))
+                {
+                    var multipartContent = new MultipartFormDataContent();
+                    multipartContent.Add(new ByteArrayContent(File.ReadAllBytes(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", UploadedFile))), "file1", Path.GetFileName(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", UploadedFile)));
+                    multipartContent.Add(new ByteArrayContent(File.ReadAllBytes(PossibleMatchFile)), "file2", Path.GetFileName(PossibleMatchFile));
+                    request.Content = multipartContent;
 
-            var response = await _client.PostAsync(url, multipartFormDataContent);
+                    response = await httpClient.SendAsync(request);
+                }
+            }
 
             if (response.IsSuccessStatusCode)
             {
@@ -395,11 +394,24 @@ namespace BlazorComputerVision.Pages
             }
         }
     }
-    
+
     public class KinCard
     {
         public string FileName { get; set; }
         public string Name { get; set; }
         public string Probability { get; set; }
     }
+
+    public class Rootobject
+    {
+        public Prediction[] predictions { get; set; }
+        public bool success { get; set; }
+    }
+
+    public class Prediction
+    {
+        public string label { get; set; }
+        public float probability { get; set; }
+    }
+
 }

@@ -17,8 +17,8 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
-    <Folder Include="Parents\" />
     <Folder Include="Upload\" />
+    <Folder Include="Parents\" />
     <Folder Include="wwwroot\Upload\" />
   </ItemGroup>
 

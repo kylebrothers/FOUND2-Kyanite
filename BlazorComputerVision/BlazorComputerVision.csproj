@@ -5,6 +5,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <UserSecretsId>9eabac0c-df1f-44ce-9e93-fdf5c8eacbc3</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileRunArguments>--env TARGET_PORT=5001 --env TARGET_IP=192.168.0.128</DockerfileRunArguments>
   </PropertyGroup>
 
   <ItemGroup>

@@ -328,6 +328,7 @@ namespace BlazorComputerVision.Pages
         public async void FindMatches()
         {
             KinCardCollection = new List<KinCard>();
+            var TempSortedList = new SortedList<Single, KinCard>(Comparer<Single>.Create((x, y) => y.CompareTo(x)));
 
             string[] PossibleMatches = Directory.GetFiles(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Parents"));
 
@@ -346,10 +347,18 @@ namespace BlazorComputerVision.Pages
 
                 Rootobject MyRootObject = JsonSerializer.Deserialize<Rootobject>(JSONResponse);
 
-                CurrentKinCard.Probability = Convert.ToString(Math.Round(MyRootObject.predictions[0].probability, 4)*100);
+                CurrentKinCard.Probability = Convert.ToSingle(Math.Round(MyRootObject.predictions[0].probability, 4)*100);
 
-                KinCardCollection.Add(CurrentKinCard);
+                TempSortedList.Add(CurrentKinCard.Probability, CurrentKinCard);
             }
+
+            foreach (KinCard MyCurrentKinCard in TempSortedList.Values)
+            {
+                KinCardCollection.Add(MyCurrentKinCard);
+            }
+
+            DisplayStep3 = false;
+            StateHasChanged();
         }
 
         string AddSpacesToSentence(string text)
@@ -370,10 +379,14 @@ namespace BlazorComputerVision.Pages
         public async Task<string> GoPost(string UploadedFile, string PossibleMatchFile)
         {
             HttpResponseMessage response;
+            var TargetIP = Environment.GetEnvironmentVariable("TARGET_IP");
+            var TargetPort = Environment.GetEnvironmentVariable("TARGET_PORT");
+
+            var TargetURL = "http://" + TargetIP + ":" + TargetPort + "/home";
 
             using (var httpClient = new HttpClient())
             {
-                using (var request = new HttpRequestMessage(new HttpMethod("POST"), "http://localhost:5001/home"))
+                using (var request = new HttpRequestMessage(new HttpMethod("POST"), TargetURL))
                 {
                     var multipartContent = new MultipartFormDataContent();
                     multipartContent.Add(new ByteArrayContent(File.ReadAllBytes(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", UploadedFile))), "file1", Path.GetFileName(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Upload", UploadedFile)));
@@ -399,7 +412,7 @@ namespace BlazorComputerVision.Pages
     {
         public string FileName { get; set; }
         public string Name { get; set; }
-        public string Probability { get; set; }
+        public Single Probability { get; set; }
     }
 
     public class Rootobject

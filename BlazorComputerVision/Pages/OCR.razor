@@ -42,12 +42,12 @@
         Find Matches
     </button>
 </div>
-<hr / hidden="@DisplayStep2">
-<div class="row pt-3" hidden="@DisplayStep2">
+<hr / hidden="@DisplayStep3">
+<div class="row pt-3" hidden="@DisplayStep3">
     @foreach (KinCard KinCard in KinCardCollection)
     {
-        <div class="col-4" hidden="@DisplayStep2">
-            <div class="card" style="width: 18rem;">
+        <div class="col-4" hidden="@DisplayStep3">
+            <div class="card mt-3" style="width: 18rem;">
                 <img class="card-img-top" src="@KinCard.FileName" alt="Card image cap">
                 <div class="card-body">
                     <h5 class="card-title">@KinCard.Name</h5>
@@ -55,7 +55,6 @@
                 </div>
             </div>
         </div>
-        base.StateHasChanged();
     }
 
 </div>

@@ -382,12 +382,12 @@ namespace BlazorComputerVision.Pages
             var TargetIP = Environment.GetEnvironmentVariable("TARGET_IP");
             var TargetPort = Environment.GetEnvironmentVariable("TARGET_PORT");
 
-            if (TargetIP != null)
+            if (TargetIP == null)
             {
                 TargetIP = "127.0.0.1";
             }
 
-            if (TargetPort != null)
+            if (TargetPort == null)
             {
                 TargetPort = "5001";
             }

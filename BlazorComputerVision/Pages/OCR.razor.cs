@@ -55,6 +55,7 @@ namespace BlazorComputerVision.Pages
             var file = files.FirstOrDefault();
             if (file == null)
             {
+                status = $"No file was selected, please try again";
                 return;
             }
             else if (file.Size > MaxFileSize)
@@ -140,7 +141,7 @@ namespace BlazorComputerVision.Pages
                     }
                     else
                     {
-                        status = $"Unable to detect faces in this imiage. Please chose another picture or try again.";
+                        status = $"Unable to detect faces in this image. Please chose another picture.";
                         return new List<DetectedFace>();
                     }
                 }
@@ -154,7 +155,7 @@ namespace BlazorComputerVision.Pages
             // Catch and display all other errors.
             catch (Exception e)
             {
-                status = $"All other errors: {e.Message}";
+                status = $"Error: {e.Message}";
                 return new List<DetectedFace>();
             }
         }
@@ -205,7 +206,7 @@ namespace BlazorComputerVision.Pages
             }
             catch (Exception ex)
             {
-                status = "Could not resize oversized image";
+                status = "Error: Oversized Image resize failed";
             }
 
         }
@@ -290,7 +291,7 @@ namespace BlazorComputerVision.Pages
             }
             catch (Exception ex)
             {
-                status = "Could not resize oversized image";
+                status = "Error: Oversized Image resize Failed";
             }
 
         }
